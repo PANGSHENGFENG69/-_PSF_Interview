@@ -21,6 +21,7 @@ void main() {
   );
 }
 
+//這邊如果有需要很多頁面的話，會在設計一個 Router的機制.
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

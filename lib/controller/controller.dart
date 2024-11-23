@@ -11,7 +11,8 @@ final weatherDataProvider =
   final response = await weatherService.getWeatherData(locationName);
 
   if (response.success == "true") {
-    return WeatherData.fromJson(response.records ?? {});
+    return WeatherData.fromJson(
+        response.records ?? {}); //沒有records 資料的話 直接回空 物件
   } else {
     throw Exception('Failed to load weather data');
   }

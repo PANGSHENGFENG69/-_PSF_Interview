@@ -25,8 +25,10 @@ class WeatherScreen extends ConsumerWidget {
           _searchBar(_weatherSearch, () {
             String inputLocation = _weatherSearch.text.trim();
             if (inputLocation.isNotEmpty) {
-              inputLocation = inputLocation.replaceAll("，", ",");
-              ref.read(locationNameProvider.state).state = inputLocation;
+              inputLocation =
+                  inputLocation.replaceAll("，", ","); //有兩種語言的 逗號(EN/CN)
+              ref.read(locationNameProvider.notifier).state =
+                  inputLocation; //把空的值 變成 textController的值
             }
           }, ref),
           Consumer(
@@ -42,8 +44,8 @@ class WeatherScreen extends ConsumerWidget {
   }
 }
 
-Widget _searchBar(
-    TextEditingController searchData, VoidCallback _rerender, WidgetRef ref) {
+Widget _searchBar(TextEditingController searchDataController,
+    VoidCallback _rerender, WidgetRef ref) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Row(
@@ -53,14 +55,11 @@ Widget _searchBar(
           child: Container(
             decoration: BoxDecoration(border: Border.all(color: Colors.black)),
             child: TextField(
-              onSubmitted: (text) {
-                String inputLocation = text.trim();
-                if (inputLocation.isNotEmpty) {
-                  inputLocation = inputLocation.replaceAll("，", ",");
-                  ref.read(locationNameProvider.notifier).state = inputLocation;
-                }
+              onSubmitted: (_) {
+                //這邊是為了 本身device的 done或enter 鍵的event
+                _rerender();
               },
-              controller: searchData,
+              controller: searchDataController,
               decoration: InputDecoration(hintText: '輸入縣市(如需多項 請加 ","符號)'),
             ),
           ),
@@ -96,51 +95,47 @@ Widget viewWeather(BuildContext context, AsyncValue<WeatherData>? weatherData) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             weatherData!.hasError ? Text("") : Text("縣市:"),
-            weatherData.value != null
-                ? weatherData.when(
-                    data: (data) {
-                      return data.location != null && data.location!.isNotEmpty
-                          ? Column(
-                              children: data.location!.asMap().entries.map((e) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Container(
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.green),
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(15)),
-                                    ),
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Center(
-                                            child: Text(
-                                              e.value.locationName ?? "",
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ),
-                                          _displayWxDetails(
-                                              e.value.weatherElement!),
-                                        ],
+            weatherData.when(
+              data: (data) {
+                return data.location != null && data.location!.isNotEmpty
+                    ? Column(
+                        children: data.location!.asMap().entries.map((e) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.green),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(15)),
+                              ),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Center(
+                                      child: Text(
+                                        e.value.locationName ?? "",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
                                       ),
                                     ),
-                                  ),
-                                );
-                              }).toList(),
-                            )
-                          : Text("查無資料");
-                    },
-                    error: (err, stack) => Text(
-                      "Error: $err",
-                      style: TextStyle(color: Colors.red),
-                    ),
-                    loading: () => CircularProgressIndicator(),
-                  )
-                : Center(child: Text('請輸入縣市名稱')),
+                                    _displayWxDetails(e.value.weatherElement!),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      )
+                    : Text("查無資料");
+              },
+              error: (err, stack) => Text(
+                "Error: $err",
+                style: TextStyle(color: Colors.red),
+              ),
+              loading: () => CircularProgressIndicator(),
+            )
           ],
         ),
       ),
