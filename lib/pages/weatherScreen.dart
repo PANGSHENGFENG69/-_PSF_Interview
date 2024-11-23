@@ -95,8 +95,8 @@ Widget viewWeather(BuildContext context, AsyncValue<WeatherData>? weatherData) {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("縣市:"),
-            weatherData != null
+            weatherData!.hasError ? Text("") : Text("縣市:"),
+            weatherData.value != null
                 ? weatherData.when(
                     data: (data) {
                       return data.location != null && data.location!.isNotEmpty
