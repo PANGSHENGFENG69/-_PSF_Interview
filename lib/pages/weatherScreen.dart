@@ -4,10 +4,13 @@ class WeatherScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     TextEditingController _weatherSearch = TextEditingController();
+
     final locationName = ref.watch(locationNameProvider);
     final weatherData = locationName.isNotEmpty
         ? ref.watch(weatherDataProvider(locationName))
         : null; //當一load進這個build的時候，預防call API
+
+    bool isLoading = weatherData?.isLoading ?? false;
 
     return Scaffold(
       appBar: AppBar(
@@ -19,25 +22,30 @@ class WeatherScreen extends ConsumerWidget {
                 loading: () => Text("等待..."),
               ),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+      body: Stack(
         children: [
-          _searchBar(_weatherSearch, () {
-            String inputLocation = _weatherSearch.text.trim();
-            if (inputLocation.isNotEmpty) {
-              inputLocation =
-                  inputLocation.replaceAll("，", ","); //有兩種語言的 逗號(EN/CN)
-              ref.read(locationNameProvider.notifier).state =
-                  inputLocation; //把空的值 變成 textController的值
-            }
-          }, ref),
-          Consumer(
-            builder: (context, ref, _) {
-              return locationName.isNotEmpty
-                  ? viewWeather(context, weatherData)
-                  : Center(child: Text('請輸入縣市名稱'));
-            },
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              _searchBar(_weatherSearch, () {
+                String inputLocation = _weatherSearch.text.trim();
+                if (inputLocation.isNotEmpty) {
+                  inputLocation =
+                      inputLocation.replaceAll("，", ","); //有兩種語言的 逗號(EN/CN)
+                  ref.read(locationNameProvider.notifier).state =
+                      inputLocation; //把空的值 變成 textController的值
+                }
+              }, ref),
+              Consumer(
+                builder: (context, ref, _) {
+                  return locationName.isNotEmpty
+                      ? viewWeather(context, weatherData)
+                      : Center(child: Text('請輸入縣市名稱'));
+                },
+              ),
+            ],
           ),
+          loadingAnimation(isLoading: isLoading)
         ],
       ),
     );
@@ -134,7 +142,7 @@ Widget viewWeather(BuildContext context, AsyncValue<WeatherData>? weatherData) {
                 "Error: $err",
                 style: TextStyle(color: Colors.red),
               ),
-              loading: () => CircularProgressIndicator(),
+              loading: () => SizedBox(),
             )
           ],
         ),

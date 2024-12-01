@@ -1,7 +1,9 @@
 part of weather_app;
 
+final _dioProvider = Provider((ref) => Dio());
+
 final weatherServiceProvider =
-    Provider((ref) => WeatherService(ref.watch(Provider((ref) => Dio()))));
+    Provider((ref) => WeatherService(ref.watch(_dioProvider)));
 
 final locationNameProvider = StateProvider<String>((ref) => "");
 

@@ -12,6 +12,7 @@ import 'package:psf_dioriverdemo/model/apiModel/Response/index.dart';
 part 'controller/controller.dart';
 part 'pages/weatherScreen.dart';
 part 'service/service.dart';
+part 'util/component_tools.dart';
 
 void main() {
   runApp(
